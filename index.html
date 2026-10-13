@@ -125,6 +125,20 @@ textarea:focus,input:focus,select:focus{border-color:var(--moss);box-shadow:0 0 
 </main>
 <footer class="footer"><span>MED · Carnet de campagne</span><span>Un grimoire de groupe, à remplir au fil des séances.</span></footer>
 </div>
+<script>
+/* Navigation autonome : les onglets restent fonctionnels même si Firebase ne charge pas. */
+document.querySelectorAll('.tab').forEach(function(button) {
+  button.addEventListener('click', function() {
+    var id = button.dataset.tab;
+    document.querySelectorAll('.tab').forEach(function(tab) {
+      tab.setAttribute('aria-selected', String(tab.dataset.tab === id));
+    });
+    document.querySelectorAll('.tab-panel').forEach(function(panel) {
+      panel.classList.toggle('hidden', panel.id !== id);
+    });
+  });
+});
+</script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
