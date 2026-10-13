@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#20251f">
+<title>MED — Carnet de campagne</title>
+<style>
+:root{--ink:#242820;--muted:#77796d;--paper:#f5f0e4;--paper2:#ebe3d2;--line:#d6cbb6;--moss:#58634b;--moss2:#394536;--gold:#b58c50;--rust:#985f48;--white:#fffdf7;--shadow:0 12px 32px #211d1512}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#ded8ca;color:var(--ink);font-family:Georgia,"Times New Roman",serif;line-height:1.55}
+button,input,textarea,select{font:inherit}button{cursor:pointer}
+.shell{max-width:1180px;margin:0 auto;min-height:100vh;background:var(--paper);box-shadow:0 0 55px #29231812}
+.hero{position:relative;overflow:hidden;background:var(--moss2);color:#f8f1e2;padding:34px clamp(20px,5vw,62px) 28px;border-bottom:4px solid var(--gold)}
+.hero:after{content:"✦";position:absolute;right:6%;top:-42px;font-size:210px;color:#ffffff0b;transform:rotate(12deg);pointer-events:none}
+.eyebrow{font:700 11px/1.4 system-ui,sans-serif;letter-spacing:.23em;text-transform:uppercase;color:#d3bc8d}
+h1{font-size:clamp(34px,6vw,60px);line-height:1.03;font-weight:normal;margin:10px 0 8px;letter-spacing:-.035em}
+.subtitle{color:#dedbcf;max-width:600px;margin:0;font-size:16px}
+.hero-bottom{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:24px;font:12px system-ui,sans-serif;color:#e8dfcc}
+.pill{border:1px solid #ffffff44;border-radius:99px;padding:6px 11px}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px clamp(16px,4vw,44px);border-bottom:1px solid var(--line);background:#eee7d8;position:sticky;top:0;z-index:5}
+.save-status{font:12px system-ui,sans-serif;color:var(--muted);display:flex;align-items:center;gap:7px}
+.dot{width:7px;height:7px;background:#71815e;border-radius:50%;display:inline-block}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--white);color:var(--ink);padding:8px 12px;border-radius:8px;font:600 12px system-ui,sans-serif}
+.btn:hover{border-color:var(--moss);background:#fff}
+.btn.primary{background:var(--moss);color:white;border-color:var(--moss)}
+.tabs{display:flex;gap:5px;padding:20px clamp(16px,4vw,44px) 0;overflow:auto;border-bottom:1px solid var(--line)}
+.tab{white-space:nowrap;border:0;background:transparent;padding:12px 16px;color:var(--muted);border-bottom:3px solid transparent;font:600 13px system-ui,sans-serif}
+.tab[aria-selected="true"]{color:var(--moss2);border-color:var(--gold)}
+main{padding:clamp(20px,4vw,44px);min-height:440px}
+.section-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:25px}
+.kicker{font:700 11px system-ui,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--rust)}
+h2{font-size:clamp(25px,4vw,35px);font-weight:normal;line-height:1.15;margin:4px 0 7px}
+.intro{color:var(--muted);margin:0;max-width:650px;font-size:14px}
+h3{font-size:19px;font-weight:normal;margin:0 0 10px}
+.panel{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:20px;box-shadow:var(--shadow);margin-bottom:16px}
+.panel-label{display:block;font:700 10px system-ui,sans-serif;text-transform:uppercase;letter-spacing:.14em;color:var(--moss);margin-bottom:9px}
+textarea,input[type=text],input[type=date],select{width:100%;border:1px solid #d9d0bf;background:#fffef9;color:var(--ink);border-radius:7px;padding:11px 12px;outline:none}
+textarea{resize:vertical;min-height:115px;line-height:1.55}
+textarea:focus,input:focus,select:focus{border-color:var(--moss);box-shadow:0 0 0 3px #58634b18}
+.field{margin-bottom:15px}.field:last-child{margin-bottom:0}
+.field small{display:block;color:var(--muted);font:12px system-ui,sans-serif;margin-top:5px}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.character-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.character{border:1px solid var(--line);background:var(--white);border-radius:11px;overflow:hidden}
+.character-top{display:flex;align-items:center;gap:11px;padding:14px 15px;background:#eee8da;border-bottom:1px solid var(--line)}
+.avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--moss);color:#fff5df;font-size:17px}
+.character-name{font-size:18px}.character-note{padding:14px}
+.character-note textarea{min-height:135px;border-color:transparent;background:#faf7ef}
+.character-note textarea:focus{border-color:var(--moss);background:white}
+.note-hint{font:11px system-ui,sans-serif;color:var(--muted);margin:8px 0 0}
+.mystery{border:1px solid var(--line);border-radius:10px;padding:16px;background:var(--white);margin-bottom:12px}
+.mystery-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.kind{font:700 10px system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;padding:5px 8px;border-radius:5px;background:#e4e8dc;color:#3e563a}
+.kind.fact{background:#eee0d4;color:#8b4f38}
+.remove{border:0;background:transparent;color:var(--muted);font:12px system-ui,sans-serif;text-decoration:underline}
+.mystery-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.empty{padding:28px;text-align:center;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:14px}
+.add-row{display:flex;justify-content:flex-start;margin-top:12px}
+.footer{padding:20px clamp(20px,4vw,44px);border-top:1px solid var(--line);font:11px system-ui,sans-serif;color:var(--muted);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.hidden{display:none!important}
+.toast{font:12px system-ui,sans-serif;color:var(--moss);min-height:18px}
+@media(max-width:680px){.toolbar{align-items:flex-start;flex-direction:column}.two,.three,.character-grid,.mystery-grid{grid-template-columns:1fr}.section-head{flex-direction:column}.panel{padding:15px}.hero{padding-top:28px}.tabs{padding-top:10px}.tab{padding:11px 12px}}
+@media print{body{background:white}.shell{box-shadow:none}.toolbar,.tabs,.actions,.add-row,.remove{display:none!important}.hero{background:#fff!important;color:#222;border-bottom:2px solid #777;padding:20px}.subtitle,.hero-bottom,.eyebrow{color:#444}main{padding:10px}.tab-panel{display:block!important;page-break-before:always}.panel,.character,.mystery{box-shadow:none;break-inside:avoid}.character-grid{grid-template-columns:1fr 1fr}.footer{display:none}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header class="hero">
+  <div class="eyebrow">Chroniques · mémoire de campagne</div>
+  <h1>MED</h1>
+  <p class="subtitle">Carnet de campagne — les traces du passé, les pistes de demain.</p>
+  <div class="hero-bottom"><span class="pill">✦ Notes de groupe</span><span class="pill">✧ Chroniques médiéval-fantastiques</span><span class="pill" id="dateLabel">Carnet partagé à compléter</span></div>
+</header>
+<div class="toolbar">
+  <div class="save-status"><span class="dot"></span><span id="saveStatus">Sauvegarde locale activée sur cet appareil</span></div>
+  <div class="actions">
+    <button class="btn" id="exportBtn">Exporter mes notes</button>
+    <button class="btn" id="importBtn">Importer une sauvegarde</button>
+    <button class="btn primary" id="printBtn">Imprimer / PDF</button>
+    <input id="fileInput" type="file" accept=".json,application/json" class="hidden">
+  </div>
+</div>
+<nav class="tabs" role="tablist" aria-label="Rubriques du carnet">
+  <button class="tab" role="tab" aria-selected="true" data-tab="session">I · Dernière séance</button>
+  <button class="tab" role="tab" aria-selected="false" data-tab="characters">II · Notes des PJ</button>
+  <button class="tab" role="tab" aria-selected="false" data-tab="next">III · Prochaine séance</button>
+  <button class="tab" role="tab" aria-selected="false" data-tab="mysteries">IV · Mystères & pistes</button>
+</nav>
+<main>
+<section class="tab-panel" id="session">
+  <div class="section-head"><div><div class="kicker">Les pages précédentes</div><h2>Dernière séance</h2><p class="intro">Gardez une trace de ce qui s’est passé, de là où vous en êtes et des choix qui comptent.</p></div></div>
+  <div class="panel">
+    <div class="two">
+      <div class="field"><label class="panel-label" for="sessionTitle">Titre ou numéro de séance</label><input id="sessionTitle" type="text" placeholder="Ex. Séance 12 — Le passage oublié"></div>
+      <div class="field"><label class="panel-label" for="sessionDate">Date de la séance</label><input id="sessionDate" type="date"></div>
+    </div>
+    <div class="field"><label class="panel-label" for="events">Événements marquants</label><textarea id="events" placeholder="Que s’est-il passé ? Quels lieux, rencontres ou révélations retenir ?"></textarea></div>
+    <div class="field"><label class="panel-label" for="ending">Situation finale</label><textarea id="ending" placeholder="Où sont les personnages à la fin ? Quel est leur état et qu’est-ce qui est en cours ?"></textarea></div>
+    <div class="field"><label class="panel-label" for="decisions">Décisions et conséquences</label><textarea id="decisions" placeholder="Choix du groupe, promesses, alliances, conséquences à suivre…"></textarea></div>
+  </div>
+</section>
+<section class="tab-panel hidden" id="characters">
+  <div class="section-head"><div><div class="kicker">Les voix du groupe</div><h2>Notes des personnages</h2><p class="intro">Un espace libre par personnage : souvenirs, idées, objectifs, détails à ne pas perdre.</p></div></div>
+  <div class="character-grid" id="characterGrid"></div>
+  <p class="note-hint">Les notes sont indépendantes. Écrivez librement, sans format imposé.</p>
+</section>
+<section class="tab-panel hidden" id="next">
+  <div class="section-head"><div><div class="kicker">À garder en tête</div><h2>Prochaine séance</h2><p class="intro">Le pense-bête du groupe pour reprendre l’aventure sans perdre le fil.</p></div></div>
+  <div class="panel">
+    <div class="field"><label class="panel-label" for="startingPoint">Point de reprise</label><textarea id="startingPoint" placeholder="La scène ou la situation par laquelle vous reprendrez…"></textarea></div>
+    <div class="two">
+      <div class="field"><label class="panel-label" for="priorities">Priorités du groupe</label><textarea id="priorities" placeholder="Ce que vous voulez faire ou régler en premier…"></textarea></div>
+      <div class="field"><label class="panel-label" for="toRemember">À ne pas oublier</label><textarea id="toRemember" placeholder="Objets, noms, promesses, échéances, indices…"></textarea></div>
+    </div>
+    <div class="field"><label class="panel-label" for="openThreads">Fils en cours à reprendre</label><textarea id="openThreads" placeholder="Pistes actives, rendez-vous, conséquences en attente…"></textarea></div>
+  </div>
+</section>
+<section class="tab-panel hidden" id="mysteries">
+  <div class="section-head"><div><div class="kicker">Ce qui reste dans l’ombre</div><h2>Mystères & pistes</h2><p class="intro">Séparez ce qui est établi de ce que quelqu’un imagine. Une hypothèse n’est pas un fait — même si elle semble convaincante.</p></div></div>
+  <div id="mysteryList"></div>
+  <div class="add-row"><button class="btn primary" id="addMystery">＋ Ajouter un mystère ou une piste</button></div>
+</section>
+</main>
+<footer class="footer"><span>MED · Carnet de campagne</span><span>Un grimoire de groupe, à remplir au fil des séances.</span></footer>
+</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
+
+// Copiez ici les valeurs de la configuration Web de votre projet Firebase.
+const firebaseConfig = {
+  apiKey: "AIzaSyA1JZPwF-5E-FFpkAdgtiC5bf97ncxJBBU",
+  authDomain: "med-carnet.firebaseapp.com",
+  databaseURL: "https://med-carnet-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "med-carnet",
+  appId: "1:547720416565:web:83aa1f57f8426ca2ef107c"
+};
+const KEY='med-carnet-campagne-v1', names=['Hélène','Oziel','Tesla','Razan','Jérémiah','Kaï'], icons=['✧','❖','⚒','☼','☽','✦'];
+const $=id=>document.getElementById(id);
+let data={mysteries:[]}, timer, cloudRef=null, cloudReady=false, applyingRemote=false;
+
+function buildCharacters(){
+ $('characterGrid').innerHTML='';
+ names.forEach((name,i)=>{
+  const card=document.createElement('article');card.className='character';
+  const top=document.createElement('div');top.className='character-top';
+  const avatar=document.createElement('span');avatar.className='avatar';avatar.textContent=icons[i];
+  const title=document.createElement('span');title.className='character-name';title.textContent=name;top.append(avatar,title);
+  const body=document.createElement('div');body.className='character-note';
+  const ta=document.createElement('textarea');ta.id='char_'+i;ta.placeholder='Notes de '+name+'…';ta.setAttribute('aria-label','Notes de '+name);
+  body.append(ta);card.append(top,body);$('characterGrid').append(card);
+ }
+}
+function renderMysteries(){
+ const list=$('mysteryList');list.innerHTML='';
+ if(!data.mysteries.length){const e=document.createElement('div');e.className='empty';e.textContent='Aucune piste consignée pour le moment. Ajoutez ici les mystères et hypothèses de la table.';list.append(e);return;}
+ data.mysteries.forEach((item,index)=>{
+  const card=document.createElement('article');card.className='mystery';
+  const top=document.createElement('div');top.className='mystery-top';
+  const badge=document.createElement('span');badge.className='kind'+(item.type==='Fait'?' fact':'');badge.textContent=item.type||'Hypothèse';
+  const del=document.createElement('button');del.className='remove';del.textContent='Supprimer';del.onclick=()=>{data.mysteries.splice(index,1);renderMysteries();scheduleSave()};top.append(badge,del);card.append(top);
+  const grid=document.createElement('div');grid.className='mystery-grid';
+  [['type','Statut','select'],['title','Mystère / piste','input'],['author','Proposé par','input'],['detail','Détail / éléments connus','textarea']].forEach(([key,label,kind])=>{
+   const wrap=document.createElement('div');wrap.className='field';const lab=document.createElement('label');lab.className='panel-label';lab.textContent=label;let el;
+   if(kind==='select'){el=document.createElement('select');['Hypothèse','Fait','Question ouverte'].forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;el.append(o)});el.value=item[key]||'Hypothèse'}
+   else if(kind==='textarea'){el=document.createElement('textarea');el.rows=3;el.placeholder='Éléments connus, raisons, indices pour ou contre…';el.value=item[key]||''}
+   else{el=document.createElement('input');el.type='text';el.placeholder=key==='author'?'Nom du joueur':'Écrire un titre…';el.value=item[key]||''}
+   el.addEventListener('input',()=>{item[key]=el.value;badge.textContent=item.type||'Hypothèse';badge.className='kind'+(item.type==='Fait'?' fact':'');scheduleSave()});
+   wrap.append(lab,el);grid.append(wrap);
+  });card.append(grid);list.append(card);
+ });
+}
+function collect(){const o={};document.querySelectorAll('main input,main textarea,main select').forEach(e=>{if(e.id)o[e.id]=e.value});o.mysteries=data.mysteries;return o}
+function apply(o){applyingRemote=true;data.mysteries=Array.isArray(o.mysteries)?o.mysteries:[];document.querySelectorAll('main input,main textarea,main select').forEach(e=>{if(e.id&&Object.hasOwn(o,e.id))e.value=o[e.id]});renderMysteries();applyingRemote=false}
+function saveLocal(){try{localStorage.setItem(KEY,JSON.stringify(collect()))}catch(e){}}
+function save(){saveLocal();if(cloudReady&&!applyingRemote){set(cloudRef,collect()).then(()=>$('saveStatus').textContent='Synchronisé avec le groupe').catch(()=>$('saveStatus').textContent='Erreur de synchro — copie locale conservée')}else if(!cloudReady)$('saveStatus').textContent='Sauvegardé sur cet appareil · partage à configurer'}
+function scheduleSave(){$('saveStatus').textContent='Enregistrement…';clearTimeout(timer);timer=setTimeout(save,500)}
+function switchTab(id){document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===id)));document.querySelectorAll('.tab-panel').forEach(s=>s.classList.toggle('hidden',s.id!==id))}
+buildCharacters();renderMysteries();
+try{const old=localStorage.getItem(KEY);if(old)apply(JSON.parse(old))}catch(e){}
+document.querySelectorAll('main input,main textarea,main select').forEach(e=>e.addEventListener('input',scheduleSave));
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));
+$('addMystery').addEventListener('click',()=>{data.mysteries.push({type:'Hypothèse',title:'',author:'',detail:''});renderMysteries();scheduleSave()});
+$('printBtn').addEventListener('click',()=>window.print());
+$('exportBtn').addEventListener('click',()=>{const blob=new Blob([JSON.stringify(collect(),null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='MED-carnet-sauvegarde.json';a.click();URL.revokeObjectURL(a.href)});
+$('importBtn').addEventListener('click',()=>$('fileInput').click());
+$('fileInput').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;try{apply(JSON.parse(await f.text()));save();$('saveStatus').textContent='Sauvegarde importée'}catch(err){$('saveStatus').textContent='Fichier invalide'}e.target.value=''});
+$('dateLabel').textContent=new Intl.DateTimeFormat('fr-FR',{dateStyle:'long'}).format(new Date());
+
+const configured=firebaseConfig.apiKey!=='VOTRE_API_KEY'&&firebaseConfig.projectId!=='VOTRE_PROJET'&&firebaseConfig.appId!=='VOTRE_APP_ID'&&!firebaseConfig.databaseURL.includes('COPIER_');
+if(configured){
+ try{
+  const app=initializeApp(firebaseConfig),auth=getAuth(app);await signInAnonymously(auth);
+  const db=getDatabase(app);cloudRef=ref(db,'med-carnet/shared');
+  onValue(cloudRef,snap=>{
+   const remote=snap.val();
+   if(remote&&typeof remote==='object'){apply(remote);saveLocal();$('saveStatus').textContent='Synchronisé avec le groupe'}
+   else set(cloudRef,collect()).then(()=>$('saveStatus').textContent='Carnet partagé prêt').catch(()=>$('saveStatus').textContent='Vérifiez les règles de la base Firebase');
+   cloudReady=true;
+  },err=>{$('saveStatus').textContent='Erreur de lecture Firebase';console.error(err)});
+ }catch(err){$('saveStatus').textContent='Synchronisation indisponible — vérifiez la configuration';console.error(err)}
+}else $('saveStatus').textContent='Mode local · suivez LISEZ-MOI.md pour activer le partage';
+</script>
+</body>
+</html>
