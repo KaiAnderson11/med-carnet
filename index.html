@@ -166,7 +166,14 @@ document.querySelectorAll('.tab').forEach(function(button) {
     });
     result.mysteries = Array.from(document.querySelectorAll('#mysteryList .mystery')).map(function(card) {
       var item = {};
-      card.querySelectorAll('[data-mystery-key]').forEach(function(el) { item[el.dataset.mysteryKey] = el.value; });
+      var keys = ['type','title','author','detail'];
+      var fields = card.querySelectorAll('.mystery-grid .field');
+      fields.forEach(function(field, index) {
+        var el = field.querySelector('select, input, textarea');
+        if (!el) return;
+        var key = el.dataset.mysteryKey || keys[index];
+        if (key) item[key] = el.value;
+      });
       return item;
     });
     return result;
@@ -174,6 +181,13 @@ document.querySelectorAll('.tab').forEach(function(button) {
   function storePageData() {
     try { localStorage.setItem('med-carnet-campagne-v1', JSON.stringify(readPageData())); } catch(e) {}
   }
+  /* Sauvegarde locale de secours pour les modifications saisies, même sans Firebase. */
+  document.addEventListener('input', function(event) {
+    if (event.target && event.target.closest && event.target.closest('main')) storePageData();
+  });
+  document.addEventListener('change', function(event) {
+    if (event.target && event.target.closest && event.target.closest('main')) storePageData();
+  });
   var exportButton = document.getElementById('exportBtn');
   if (exportButton && !exportButton.dataset.fallbackReady) {
     exportButton.dataset.fallbackReady = 'true';
