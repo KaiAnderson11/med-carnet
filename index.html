@@ -155,6 +155,59 @@ document.querySelectorAll('.tab').forEach(function(button) {
     area.placeholder = 'Notes de ' + name + '…'; area.setAttribute('aria-label', 'Notes de ' + name);
     body.append(area); card.append(top, body); grid.append(card);
   });
+  /* Navigation et ajout de mystères de secours si le module principal ne se charge pas. */
+  var list = document.getElementById('mysteryList');
+  var add = document.getElementById('addMystery');
+  if (list && add && !add.dataset.fallbackReady) {
+    add.dataset.fallbackReady = 'true';
+    add.addEventListener('click', function() {
+      var card = document.createElement('article'); card.className = 'mystery';
+      var top = document.createElement('div'); top.className = 'mystery-top';
+      var badge = document.createElement('span'); badge.className = 'kind'; badge.textContent = 'Hypothèse';
+      var del = document.createElement('button'); del.className = 'remove'; del.type = 'button'; del.textContent = 'Supprimer';
+      del.addEventListener('click', function() { card.remove(); saveFallback(); });
+      top.append(badge, del); card.append(top);
+      var fields = document.createElement('div'); fields.className = 'mystery-grid';
+      function addField(labelText, kind, key, placeholder) {
+        var wrap = document.createElement('div'); wrap.className = 'field';
+        var label = document.createElement('label'); label.className = 'panel-label'; label.textContent = labelText;
+        var el;
+        if (kind === 'select') {
+          el = document.createElement('select');
+          ['Hypothèse','Fait','Question ouverte'].forEach(function(v) { var o = document.createElement('option'); o.value = v; o.textContent = v; el.append(o); });
+          el.value = 'Hypothèse';
+          el.addEventListener('change', function() { badge.textContent = el.value; badge.className = 'kind' + (el.value === 'Fait' ? ' fact' : ''); saveFallback(); });
+        } else if (kind === 'textarea') {
+          el = document.createElement('textarea'); el.rows = 3; el.placeholder = placeholder;
+          el.addEventListener('input', saveFallback);
+        } else {
+          el = document.createElement('input'); el.type = 'text'; el.placeholder = placeholder;
+          el.addEventListener('input', saveFallback);
+        }
+        el.dataset.mysteryKey = key; label.append(el); wrap.append(label); fields.append(wrap);
+      }
+      addField('Statut','select','type','');
+      addField('Mystère / piste','input','title','Écrire un titre…');
+      addField('Proposé par','input','author','Nom du joueur');
+      addField('Détail / éléments connus','textarea','detail','Indices, raisons, éléments connus…');
+      card.append(fields); list.append(card);
+      var empty = list.querySelector('.empty'); if (empty) empty.remove();
+      saveFallback();
+    });
+    function saveFallback() {
+      try {
+        var mysteries = Array.from(list.querySelectorAll('.mystery')).map(function(card) {
+          var item = {};
+          card.querySelectorAll('[data-mystery-key]').forEach(function(el) { item[el.dataset.mysteryKey] = el.value; });
+          return item;
+        });
+        var old = {};
+        try { old = JSON.parse(localStorage.getItem('med-carnet-campagne-v1') || '{}'); } catch(e) {}
+        old.mysteries = mysteries;
+        localStorage.setItem('med-carnet-campagne-v1', JSON.stringify(old));
+      } catch(e) {}
+    }
+  }
 })();
 </script>
 <script type="module">
