@@ -330,7 +330,7 @@ function buildCharacters(){
   const body=document.createElement('div');body.className='character-note';
   const ta=document.createElement('textarea');ta.id='char_'+i;ta.placeholder='Notes de '+name+'…';ta.setAttribute('aria-label','Notes de '+name);
   body.append(ta);card.append(top,body);$('characterGrid').append(card);
- }
+ });
 }
 function renderMysteries(){
  const list=$('mysteryList');list.innerHTML='';
