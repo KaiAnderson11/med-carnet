@@ -138,6 +138,24 @@ document.querySelectorAll('.tab').forEach(function(button) {
     });
   });
 });
+/* Filet de sécurité : affiche les six fiches PJ même si le module Firebase échoue à charger. */
+(function() {
+  var grid = document.getElementById('characterGrid');
+  if (!grid || grid.children.length) return;
+  var names = ['Hélène','Oziel','Tesla','Razan','Jérémiah','Kaï'];
+  var icons = ['✧','❖','⚒','☼','☽','✦'];
+  names.forEach(function(name, i) {
+    var card = document.createElement('article'); card.className = 'character';
+    var top = document.createElement('div'); top.className = 'character-top';
+    var avatar = document.createElement('span'); avatar.className = 'avatar'; avatar.textContent = icons[i];
+    var title = document.createElement('span'); title.className = 'character-name'; title.textContent = name;
+    top.append(avatar, title);
+    var body = document.createElement('div'); body.className = 'character-note';
+    var area = document.createElement('textarea'); area.id = 'char_' + i;
+    area.placeholder = 'Notes de ' + name + '…'; area.setAttribute('aria-label', 'Notes de ' + name);
+    body.append(area); card.append(top, body); grid.append(card);
+  });
+})();
 </script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
