@@ -158,6 +158,85 @@ document.querySelectorAll('.tab').forEach(function(button) {
   /* Navigation et ajout de mystères de secours si le module principal ne se charge pas. */
   var list = document.getElementById('mysteryList');
   var add = document.getElementById('addMystery');
+  /* Les outils de sauvegarde et d'impression fonctionnent même si Firebase ne démarre pas. */
+  function readPageData() {
+    var result = {};
+    document.querySelectorAll('main input, main textarea, main select').forEach(function(el) {
+      if (el.id) result[el.id] = el.value;
+    });
+    result.mysteries = Array.from(document.querySelectorAll('#mysteryList .mystery')).map(function(card) {
+      var item = {};
+      card.querySelectorAll('[data-mystery-key]').forEach(function(el) { item[el.dataset.mysteryKey] = el.value; });
+      return item;
+    });
+    return result;
+  }
+  function storePageData() {
+    try { localStorage.setItem('med-carnet-campagne-v1', JSON.stringify(readPageData())); } catch(e) {}
+  }
+  var exportButton = document.getElementById('exportBtn');
+  if (exportButton && !exportButton.dataset.fallbackReady) {
+    exportButton.dataset.fallbackReady = 'true';
+    exportButton.addEventListener('click', function(event) {
+      event.preventDefault(); event.stopImmediatePropagation();
+      var blob = new Blob([JSON.stringify(readPageData(), null, 2)], {type:'application/json'});
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a'); a.href = url; a.download = 'MED-carnet-sauvegarde.json';
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+      storePageData();
+    }, true);
+  }
+  var importButton = document.getElementById('importBtn');
+  var fileInput = document.getElementById('fileInput');
+  if (importButton && fileInput && !importButton.dataset.fallbackReady) {
+    importButton.dataset.fallbackReady = 'true';
+    importButton.addEventListener('click', function(event) {
+      event.preventDefault(); event.stopImmediatePropagation(); fileInput.click();
+    }, true);
+    fileInput.addEventListener('change', function(event) {
+      var file = event.target.files && event.target.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function() {
+        try {
+          var data = JSON.parse(reader.result);
+          document.querySelectorAll('main input, main textarea, main select').forEach(function(el) {
+            if (el.id && Object.prototype.hasOwnProperty.call(data, el.id)) el.value = data[el.id];
+          });
+          var mysteryList = document.getElementById('mysteryList');
+          if (mysteryList) mysteryList.innerHTML = '';
+          (Array.isArray(data.mysteries) ? data.mysteries : []).forEach(function(item) {
+            if (add) add.click();
+            var cards = document.querySelectorAll('#mysteryList .mystery');
+            var card = cards[cards.length - 1];
+            if (!card) return;
+            card.querySelectorAll('[data-mystery-key]').forEach(function(el) {
+              if (Object.prototype.hasOwnProperty.call(item, el.dataset.mysteryKey)) {
+                el.value = item[el.dataset.mysteryKey] || '';
+                el.dispatchEvent(new Event(el.tagName === 'SELECT' ? 'change' : 'input', {bubbles:true}));
+              }
+            });
+          });
+          storePageData();
+          var status = document.getElementById('saveStatus');
+          if (status) status.textContent = 'Sauvegarde importée sur cet appareil';
+        } catch(error) {
+          var status = document.getElementById('saveStatus');
+          if (status) status.textContent = 'Fichier invalide — import impossible';
+        }
+        fileInput.value = '';
+      };
+      reader.readAsText(file);
+    });
+  }
+  var printButton = document.getElementById('printBtn');
+  if (printButton && !printButton.dataset.fallbackReady) {
+    printButton.dataset.fallbackReady = 'true';
+    printButton.addEventListener('click', function(event) {
+      event.preventDefault(); event.stopImmediatePropagation();
+      storePageData(); window.print();
+    }, true);
+  }
   if (list && add && !add.dataset.fallbackReady) {
     add.dataset.fallbackReady = 'true';
     add.addEventListener('click', function() {
