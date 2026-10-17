@@ -67,13 +67,24 @@ textarea:focus,input:focus,select:focus{border-color:var(--moss);box-shadow:0 0 
 .toast{font:12px system-ui,sans-serif;color:var(--moss);min-height:18px}
 @media(max-width:680px){.toolbar{align-items:flex-start;flex-direction:column}.two,.three,.character-grid,.mystery-grid{grid-template-columns:1fr}.section-head{flex-direction:column}.panel{padding:15px}.hero{padding-top:28px}.tabs{padding-top:10px}.tab{padding:11px 12px}}
 @media print{body{background:white}.shell{box-shadow:none}.toolbar,.tabs,.actions,.add-row,.remove{display:none!important}.hero{background:#fff!important;color:#222;border-bottom:2px solid #777;padding:20px}.subtitle,.hero-bottom,.eyebrow{color:#444}main{padding:10px}.tab-panel{display:block!important;page-break-before:always}.panel,.character,.mystery{box-shadow:none;break-inside:avoid}.character-grid{grid-template-columns:1fr 1fr}.footer{display:none}}
+
+.hero{position:relative;isolation:isolate;overflow:hidden;background:linear-gradient(105deg,#20271f 0%,#293326 55%,#20271f 100%);border:1px solid #8c805d;box-shadow:0 8px 24px #151a1433}
+.hero:before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(ellipse at 18% 15%,#8c9b6830,transparent 45%),linear-gradient(90deg,#1e261ee8 0%,#1e261eb8 48%,#1e261e58 78%,#1e261e99 100%)}
+.hero-art{position:absolute;inset:0;z-index:-1;pointer-events:none}
+.hero-map{position:absolute;right:0;top:-42%;height:185%;width:58%;object-fit:cover;object-position:center;opacity:.36;filter:sepia(.35) saturate(.7) contrast(1.04);mask-image:linear-gradient(90deg,transparent 0%,#000 28%,#000 88%,transparent 100%)}
+.hero-tavernier{position:absolute;right:16%;bottom:-48%;height:170%;width:auto;max-width:32%;object-fit:contain;object-position:bottom;opacity:.9;filter:sepia(.15) saturate(.8);mask-image:linear-gradient(180deg,transparent 0%,#000 17%,#000 82%,transparent 100%)}
+.hero-content{position:relative;z-index:1;padding:1.5rem clamp(1rem,4vw,3rem)}
+.hero h1{color:#f5edda;text-shadow:0 2px 12px #10160fc9;letter-spacing:.08em}
+.hero .pill{background:#20291fbd;border-color:#b8a777;color:#f5edda;backdrop-filter:blur(3px)}
+@media(max-width:640px){.hero-content{padding:1.1rem .9rem}.hero-map{width:76%;right:-18%;opacity:.25}.hero-tavernier{right:4%;height:118%;bottom:-24%;max-width:39%;opacity:.58}.hero-bottom{position:relative;z-index:2;max-width:78%;flex-wrap:wrap}.hero h1{font-size:2rem}}
+
 </style>
 </head>
 <body>
 <div class="shell">
 <header class="hero">
-  <h1>MED</h1>
-  <div class="hero-bottom"><span class="pill">✧ Chroniques de la compagnie des choux</span><span class="pill" id="dateLabel">Date de séance à renseigner</span></div>
+  <div class="hero-art" aria-hidden="true"><img class="hero-map" src="assets/plan-keroman.webp" alt=""><img class="hero-tavernier" src="assets/drotham.webp" alt=""></div>
+  <div class="hero-content"><h1>MED</h1><div class="hero-bottom"><span class="pill">✧ Chroniques de la compagnie des choux</span><span class="pill" id="dateLabel">Date de séance à renseigner</span></div></div>
 </header>
 <div class="toolbar">
   <div class="save-status"><span class="dot"></span><span id="saveStatus">Sauvegarde locale activée sur cet appareil</span></div>
