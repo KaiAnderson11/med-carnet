@@ -19,6 +19,10 @@ h1{font-size:clamp(34px,6vw,60px);line-height:1.03;font-weight:normal;margin:10p
 .pill{border:1px solid #ffffff44;border-radius:99px;padding:6px 11px}
 .toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px clamp(16px,4vw,44px);border-bottom:1px solid var(--line);background:#eee7d8;position:sticky;top:0;z-index:5}
 .save-status{font:12px system-ui,sans-serif;color:var(--muted);display:flex;align-items:center;gap:7px}
+.session-manager{display:flex;align-items:end;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.session-manager .field{flex:1;min-width:220px;margin:0}
+.session-manager-note{width:100%;margin:0;color:var(--muted);font:12px system-ui,sans-serif}
+@media(max-width:560px){.session-manager .field{min-width:100%}.session-manager .btn{width:100%}}
 .dot{width:7px;height:7px;background:#71815e;border-radius:50%;display:inline-block}
 .actions{display:flex;gap:8px;flex-wrap:wrap}
 .btn{border:1px solid var(--line);background:var(--white);color:var(--ink);padding:8px 12px;border-radius:8px;font:600 12px system-ui,sans-serif}
@@ -68,10 +72,8 @@ textarea:focus,input:focus,select:focus{border-color:var(--moss);box-shadow:0 0 
 <body>
 <div class="shell">
 <header class="hero">
-  <div class="eyebrow">Chroniques · mémoire de campagne</div>
   <h1>MED</h1>
-  <p class="subtitle">Carnet de campagne</p>
-  <div class="hero-bottom"><span class="pill">✦ Notes de groupe</span><span class="pill">✧ Chroniques de la compagnie des choux</span><span class="pill" id="dateLabel">Carnet partagé à compléter</span></div>
+  <div class="hero-bottom"><span class="pill">✧ Chroniques de la compagnie des choux</span><span class="pill" id="dateLabel">Date de séance à renseigner</span></div>
 </header>
 <div class="toolbar">
   <div class="save-status"><span class="dot"></span><span id="saveStatus">Sauvegarde locale activée sur cet appareil</span></div>
@@ -90,7 +92,12 @@ textarea:focus,input:focus,select:focus{border-color:var(--moss);box-shadow:0 0 
 </nav>
 <main>
 <section class="tab-panel" id="session">
-  <div class="section-head"><div><div class="kicker">Les pages précédentes</div><h2>Dernière séance</h2><p class="intro">Un compte rendu commun, rapide à compléter : date, faits marquants et actions à mener.</p></div></div>
+  <div class="section-head"><div><div class="kicker">Les pages précédentes</div><h2>Historique des séances</h2><p class="intro">Un seul compte rendu partagé : choisissez une séance passée ou créez-en une nouvelle.</p></div></div>
+  <div class="panel session-manager">
+    <div class="field"><label class="panel-label" for="sessionPicker">Consulter une séance</label><select id="sessionPicker" aria-label="Choisir une séance enregistrée"></select></div>
+    <button class="btn primary" type="button" id="newSessionBtn">＋ Nouvelle séance</button>
+    <p class="session-manager-note">Les séances précédentes restent disponibles et modifiables pour tout le groupe.</p>
+  </div>
   <div class="panel">
     <div class="field"><label class="panel-label" for="sessionDate">Date de la séance</label><input id="sessionDate" type="date"></div>
     <div class="field"><label class="panel-label" for="events">Faits marquants</label><textarea id="events" placeholder="Les événements importants, découvertes, rencontres et décisions à retenir…"></textarea></div>
@@ -121,199 +128,7 @@ textarea:focus,input:focus,select:focus{border-color:var(--moss);box-shadow:0 0 
 </main>
 <footer class="footer"><span>MED · Carnet de campagne</span><span>Un grimoire de groupe, à remplir au fil des séances.</span></footer>
 </div>
-<script>
-/* Navigation autonome : les onglets restent fonctionnels même si Firebase ne charge pas. */
-document.querySelectorAll('.tab').forEach(function(button) {
-  button.addEventListener('click', function() {
-    var id = button.dataset.tab;
-    document.querySelectorAll('.tab').forEach(function(tab) {
-      tab.setAttribute('aria-selected', String(tab.dataset.tab === id));
-    });
-    document.querySelectorAll('.tab-panel').forEach(function(panel) {
-      panel.classList.toggle('hidden', panel.id !== id);
-    });
-  });
-});
-/* Filet de sécurité : affiche les six fiches PJ même si le module Firebase échoue à charger. */
-(function() {
-  var grid = document.getElementById('characterGrid');
-  if (!grid || grid.children.length) return;
-  var names = ['Hélène','Oziel','Tesla','Razan','Jérémiah','Kaï'];
-  var icons = ['✧','❖','⚒','☼','☽','✦'];
-  names.forEach(function(name, i) {
-    var card = document.createElement('article'); card.className = 'character';
-    var top = document.createElement('div'); top.className = 'character-top';
-    var avatar = document.createElement('span'); avatar.className = 'avatar'; avatar.textContent = icons[i];
-    var title = document.createElement('span'); title.className = 'character-name'; title.textContent = name;
-    top.append(avatar, title);
-    var body = document.createElement('div'); body.className = 'character-note';
-    var area = document.createElement('textarea'); area.id = 'char_' + i;
-    area.placeholder = 'Notes de ' + name + '…'; area.setAttribute('aria-label', 'Notes de ' + name);
-    body.append(area); card.append(top, body); grid.append(card);
-  });
-  /* Navigation et ajout de mystères de secours si le module principal ne se charge pas. */
-  var list = document.getElementById('mysteryList');
-  var add = document.getElementById('addMystery');
-  /* Les outils de sauvegarde et d'impression fonctionnent même si Firebase ne démarre pas. */
-  function readPageData() {
-    var result = {};
-    document.querySelectorAll('main input, main textarea, main select').forEach(function(el) {
-      if (el.id) result[el.id] = el.value;
-    });
-    if (!result.actions) {
-      var legacyActions = [];
-      if (result.decisions) legacyActions.push('Actions à mener / décisions :\n' + result.decisions);
-      if (result.ending) legacyActions.push('Situation de fin de séance :\n' + result.ending);
-      if (legacyActions.length) result.actions = legacyActions.join('\n\n');
-    }
-    delete result.sessionTitle;
-    delete result.ending;
-    delete result.decisions;
-    result.mysteries = Array.from(document.querySelectorAll('#mysteryList .mystery')).map(function(card) {
-      var item = {};
-      var keys = ['type','title','author','detail'];
-      var fields = card.querySelectorAll('.mystery-grid .field');
-      fields.forEach(function(field, index) {
-        var el = field.querySelector('select, input, textarea');
-        if (!el) return;
-        var key = el.dataset.mysteryKey || keys[index];
-        if (key) item[key] = el.value;
-      });
-      return item;
-    });
-    return result;
-  }
-  function storePageData() {
-    try { localStorage.setItem('med-carnet-campagne-v1', JSON.stringify(readPageData())); } catch(e) {}
-  }
-  /* Sauvegarde locale de secours pour les modifications saisies, même sans Firebase. */
-  document.addEventListener('input', function(event) {
-    if (event.target && event.target.closest && event.target.closest('main')) storePageData();
-  });
-  document.addEventListener('change', function(event) {
-    if (event.target && event.target.closest && event.target.closest('main')) storePageData();
-  });
-  var exportButton = document.getElementById('exportBtn');
-  if (exportButton && !exportButton.dataset.fallbackReady) {
-    exportButton.dataset.fallbackReady = 'true';
-    exportButton.addEventListener('click', function(event) {
-      event.preventDefault(); event.stopImmediatePropagation();
-      var blob = new Blob([JSON.stringify(readPageData(), null, 2)], {type:'application/json'});
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement('a'); a.href = url; a.download = 'MED-carnet-sauvegarde.json';
-      document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
-      storePageData();
-    }, true);
-  }
-  var importButton = document.getElementById('importBtn');
-  var fileInput = document.getElementById('fileInput');
-  if (importButton && fileInput && !importButton.dataset.fallbackReady) {
-    importButton.dataset.fallbackReady = 'true';
-    importButton.addEventListener('click', function(event) {
-      event.preventDefault(); event.stopImmediatePropagation(); fileInput.click();
-    }, true);
-    fileInput.addEventListener('change', function(event) {
-      var file = event.target.files && event.target.files[0];
-      if (!file) return;
-      var reader = new FileReader();
-      reader.onload = function() {
-        try {
-          var data = JSON.parse(reader.result);
-          if (!data.actions) {
-            var legacyActions = [];
-            if (data.decisions) legacyActions.push('Actions à mener / décisions :\n' + data.decisions);
-            if (data.ending) legacyActions.push('Situation de fin de séance :\n' + data.ending);
-            if (legacyActions.length) data.actions = legacyActions.join('\n\n');
-          }
-          document.querySelectorAll('main input, main textarea, main select').forEach(function(el) {
-            if (el.id && Object.prototype.hasOwnProperty.call(data, el.id)) el.value = data[el.id];
-          });
-          var mysteryList = document.getElementById('mysteryList');
-          if (mysteryList) mysteryList.innerHTML = '';
-          (Array.isArray(data.mysteries) ? data.mysteries : []).forEach(function(item) {
-            if (add) add.click();
-            var cards = document.querySelectorAll('#mysteryList .mystery');
-            var card = cards[cards.length - 1];
-            if (!card) return;
-            card.querySelectorAll('[data-mystery-key]').forEach(function(el) {
-              if (Object.prototype.hasOwnProperty.call(item, el.dataset.mysteryKey)) {
-                el.value = item[el.dataset.mysteryKey] || '';
-                el.dispatchEvent(new Event(el.tagName === 'SELECT' ? 'change' : 'input', {bubbles:true}));
-              }
-            });
-          });
-          storePageData();
-          var status = document.getElementById('saveStatus');
-          if (status) status.textContent = 'Sauvegarde importée sur cet appareil';
-        } catch(error) {
-          var status = document.getElementById('saveStatus');
-          if (status) status.textContent = 'Fichier invalide — import impossible';
-        }
-        fileInput.value = '';
-      };
-      reader.readAsText(file);
-    });
-  }
-  var printButton = document.getElementById('printBtn');
-  if (printButton && !printButton.dataset.fallbackReady) {
-    printButton.dataset.fallbackReady = 'true';
-    printButton.addEventListener('click', function(event) {
-      event.preventDefault(); event.stopImmediatePropagation();
-      storePageData(); window.print();
-    }, true);
-  }
-  if (list && add && !add.dataset.fallbackReady) {
-    add.dataset.fallbackReady = 'true';
-    add.addEventListener('click', function() {
-      var card = document.createElement('article'); card.className = 'mystery';
-      var top = document.createElement('div'); top.className = 'mystery-top';
-      var badge = document.createElement('span'); badge.className = 'kind'; badge.textContent = 'Hypothèse';
-      var del = document.createElement('button'); del.className = 'remove'; del.type = 'button'; del.textContent = 'Supprimer';
-      del.addEventListener('click', function() { card.remove(); saveFallback(); });
-      top.append(badge, del); card.append(top);
-      var fields = document.createElement('div'); fields.className = 'mystery-grid';
-      function addField(labelText, kind, key, placeholder) {
-        var wrap = document.createElement('div'); wrap.className = 'field';
-        var label = document.createElement('label'); label.className = 'panel-label'; label.textContent = labelText;
-        var el;
-        if (kind === 'select') {
-          el = document.createElement('select');
-          ['Hypothèse','Fait','Question ouverte'].forEach(function(v) { var o = document.createElement('option'); o.value = v; o.textContent = v; el.append(o); });
-          el.value = 'Hypothèse';
-          el.addEventListener('change', function() { badge.textContent = el.value; badge.className = 'kind' + (el.value === 'Fait' ? ' fact' : ''); saveFallback(); });
-        } else if (kind === 'textarea') {
-          el = document.createElement('textarea'); el.rows = 3; el.placeholder = placeholder;
-          el.addEventListener('input', saveFallback);
-        } else {
-          el = document.createElement('input'); el.type = 'text'; el.placeholder = placeholder;
-          el.addEventListener('input', saveFallback);
-        }
-        el.dataset.mysteryKey = key; label.append(el); wrap.append(label); fields.append(wrap);
-      }
-      addField('Statut','select','type','');
-      addField('Mystère / piste','input','title','Écrire un titre…');
-      addField('Proposé par','input','author','Nom du joueur');
-      addField('Détail / éléments connus','textarea','detail','Indices, raisons, éléments connus…');
-      card.append(fields); list.append(card);
-      var empty = list.querySelector('.empty'); if (empty) empty.remove();
-      saveFallback();
-    });
-    function saveFallback() {
-      try {
-        var mysteries = Array.from(list.querySelectorAll('.mystery')).map(function(card) {
-          var item = {};
-          card.querySelectorAll('[data-mystery-key]').forEach(function(el) { item[el.dataset.mysteryKey] = el.value; });
-          return item;
-        });
-        var old = {};
-        try { old = JSON.parse(localStorage.getItem('med-carnet-campagne-v1') || '{}'); } catch(e) {}
-        old.mysteries = mysteries;
-        localStorage.setItem('med-carnet-campagne-v1', JSON.stringify(old));
-      } catch(e) {}
-    }
-  }
-})();
-</script>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
@@ -329,7 +144,7 @@ const firebaseConfig = {
 };
 const KEY='med-carnet-campagne-v1', names=['Hélène','Oziel','Tesla','Razan','Jérémiah','Kaï'], icons=['✧','❖','⚒','☼','☽','✦'];
 const $=id=>document.getElementById(id);
-let data={mysteries:[]}, timer, cloudRef=null, cloudReady=false, applyingRemote=false;
+let data={mysteries:[],sessions:[],activeSessionId:''}, timer, cloudRef=null, cloudReady=false, applyingRemote=false, activeSessionId='';
 
 function buildCharacters(){
  $('characterGrid').innerHTML='';
@@ -362,22 +177,33 @@ function renderMysteries(){
   });card.append(grid);list.append(card);
  });
 }
-function collect(){const o={};document.querySelectorAll('main input,main textarea,main select').forEach(e=>{if(e.id)o[e.id]=e.value});o.mysteries=data.mysteries;return o}
-function apply(o){applyingRemote=true;o=o&&typeof o==='object'?{...o}:{};if(!o.actions){const legacy=[];if(o.decisions)legacy.push('Actions à mener / décisions :\n'+o.decisions);if(o.ending)legacy.push('Situation de fin de séance :\n'+o.ending);if(legacy.length)o.actions=legacy.join('\n\n')}delete o.sessionTitle;delete o.ending;delete o.decisions;data.mysteries=Array.isArray(o.mysteries)?o.mysteries:[];document.querySelectorAll('main input,main textarea,main select').forEach(e=>{if(e.id&&Object.hasOwn(o,e.id))e.value=o[e.id]});renderMysteries();applyingRemote=false}
+function makeSessionId(){return 'seance-'+Date.now()+'-'+Math.random().toString(36).slice(2,8)}
+function formatSessionDate(value){if(!value)return 'Date à renseigner';const p=value.split('-').map(Number);return new Intl.DateTimeFormat('fr-FR',{dateStyle:'long'}).format(new Date(p[0],p[1]-1,p[2]))}
+function updateHeaderDate(){const value=$('sessionDate').value;$('dateLabel').textContent=value?'Séance du '+formatSessionDate(value):'Date de séance à renseigner'}
+function captureActiveSession(){if(!activeSessionId)activeSessionId=makeSessionId();const current={id:activeSessionId,date:$('sessionDate').value||'',events:$('events').value||'',actions:$('actions').value||''};const i=data.sessions.findIndex(s=>s.id===activeSessionId);if(i>=0)data.sessions[i]=current;else data.sessions.push(current)}
+function renderSessionPicker(){const picker=$('sessionPicker');if(!picker)return;picker.innerHTML='';const sessions=[...data.sessions].sort((a,b)=>(b.date||'').localeCompare(a.date||''));sessions.forEach(s=>{const option=document.createElement('option');option.value=s.id;option.textContent=formatSessionDate(s.date)+(s.id===activeSessionId?' · séance consultée':'');picker.append(option)});if(!sessions.length){const option=document.createElement('option');option.value='';option.textContent='Aucune séance';picker.append(option)}picker.value=activeSessionId}
+function loadActiveSession(){const s=data.sessions.find(x=>x.id===activeSessionId);$('sessionDate').value=s?.date||'';$('events').value=s?.events||'';$('actions').value=s?.actions||'';updateHeaderDate();renderSessionPicker()}
+function createSession(){captureActiveSession();const s={id:makeSessionId(),date:'',events:'',actions:''};data.sessions.push(s);activeSessionId=s.id;loadActiveSession();scheduleSave()}
+function collect(){captureActiveSession();const o={};document.querySelectorAll('main input,main textarea,main select').forEach(e=>{if(e.id&&e.id!=='sessionPicker')o[e.id]=e.value});o.mysteries=data.mysteries;o.sessions=data.sessions.map(s=>({...s}));o.activeSessionId=activeSessionId;return o}
+function apply(o){applyingRemote=true;o=o&&typeof o==='object'?{...o}:{};if(!o.actions){const legacy=[];if(o.decisions)legacy.push('Actions à mener / décisions :\n'+o.decisions);if(o.ending)legacy.push('Situation de fin de séance :\n'+o.ending);if(legacy.length)o.actions=legacy.join('\n\n')}delete o.sessionTitle;delete o.ending;delete o.decisions;data.mysteries=Array.isArray(o.mysteries)?o.mysteries:[];if(Array.isArray(o.sessions)&&o.sessions.length){data.sessions=o.sessions.filter(s=>s&&typeof s==='object').map((s,i)=>({id:s.id||('seance-import-'+i),date:s.date||'',events:s.events||'',actions:s.actions||''}))}else{data.sessions=[{id:makeSessionId(),date:o.sessionDate||'',events:o.events||'',actions:o.actions||''}]}activeSessionId=data.sessions.some(s=>s.id===o.activeSessionId)?o.activeSessionId:data.sessions[data.sessions.length-1].id;document.querySelectorAll('main input,main textarea,main select').forEach(e=>{if(e.id&&e.id!=='sessionPicker'&&Object.hasOwn(o,e.id)&&!['sessionDate','events','actions'].includes(e.id))e.value=o[e.id]});loadActiveSession();renderMysteries();applyingRemote=false}
 function saveLocal(){try{localStorage.setItem(KEY,JSON.stringify(collect()))}catch(e){}}
-function save(){saveLocal();if(cloudReady&&!applyingRemote){set(cloudRef,collect()).then(()=>$('saveStatus').textContent='Synchronisé avec le groupe').catch(()=>$('saveStatus').textContent='Erreur de synchro — copie locale conservée')}else if(!cloudReady)$('saveStatus').textContent='Sauvegardé sur cet appareil · partage à configurer'}
+function save(){if(!applyingRemote)captureActiveSession();const payload=collect();saveLocal();if(cloudReady&&!applyingRemote){set(cloudRef,payload).then(()=>$('saveStatus').textContent='Synchronisé avec le groupe').catch(()=>$('saveStatus').textContent='Erreur de synchro — copie locale conservée')}else if(!cloudReady)$('saveStatus').textContent='Sauvegardé sur cet appareil · partage à configurer'}
 function scheduleSave(){$('saveStatus').textContent='Enregistrement…';clearTimeout(timer);timer=setTimeout(save,500)}
 function switchTab(id){document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===id)));document.querySelectorAll('.tab-panel').forEach(s=>s.classList.toggle('hidden',s.id!==id))}
 buildCharacters();renderMysteries();
 try{const old=localStorage.getItem(KEY);if(old)apply(JSON.parse(old))}catch(e){}
+if(!data.sessions.length){data.sessions=[{id:makeSessionId(),date:$('sessionDate').value||'',events:$('events').value||'',actions:$('actions').value||''}];activeSessionId=data.sessions[0].id}
+loadActiveSession();
 document.querySelectorAll('main input,main textarea,main select').forEach(e=>e.addEventListener('input',scheduleSave));
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));
+$('sessionPicker').addEventListener('change',()=>{captureActiveSession();activeSessionId=$('sessionPicker').value;loadActiveSession();scheduleSave()});
+$('newSessionBtn').addEventListener('click',createSession);
+$('sessionDate').addEventListener('change',()=>{updateHeaderDate();scheduleSave()});
 $('addMystery').addEventListener('click',()=>{data.mysteries.push({type:'Hypothèse',title:'',author:'',detail:''});renderMysteries();scheduleSave()});
 $('printBtn').addEventListener('click',()=>window.print());
-$('exportBtn').addEventListener('click',()=>{const blob=new Blob([JSON.stringify(collect(),null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='MED-carnet-sauvegarde.json';a.click();URL.revokeObjectURL(a.href)});
+$('exportBtn').addEventListener('click',()=>{const blob=new Blob([JSON.stringify(collect(),null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='MED-carnet-sauvegarde.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)});
 $('importBtn').addEventListener('click',()=>$('fileInput').click());
 $('fileInput').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;try{apply(JSON.parse(await f.text()));save();$('saveStatus').textContent='Sauvegarde importée'}catch(err){$('saveStatus').textContent='Fichier invalide'}e.target.value=''});
-$('dateLabel').textContent=new Intl.DateTimeFormat('fr-FR',{dateStyle:'long'}).format(new Date());
 
 const configured=firebaseConfig.apiKey!=='VOTRE_API_KEY'&&firebaseConfig.projectId!=='VOTRE_PROJET'&&firebaseConfig.appId!=='VOTRE_APP_ID'&&!firebaseConfig.databaseURL.includes('COPIER_');
 if(configured){
