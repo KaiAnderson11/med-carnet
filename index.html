@@ -10,8 +10,17 @@
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#ded8ca;color:var(--ink);font-family:Georgia,"Times New Roman",serif;line-height:1.55}
 button,input,textarea,select{font:inherit}button{cursor:pointer}
 .shell{max-width:1180px;margin:0 auto;min-height:100vh;background:var(--paper);box-shadow:0 0 55px #29231812}
-.hero{position:relative;overflow:hidden;background:var(--moss2);color:#f8f1e2;padding:34px clamp(20px,5vw,62px) 28px;border-bottom:4px solid var(--gold)}
-.hero:after{content:"✦";position:absolute;right:6%;top:-42px;font-size:210px;color:#ffffff0b;transform:rotate(12deg);pointer-events:none}
+.hero{position:relative;isolation:isolate;overflow:hidden;min-height:150px;padding:26px clamp(18px,4vw,54px) 22px;background:#20271e;color:#f8f1e2;border-bottom:3px solid var(--gold)}
+.hero:before{content:"";position:absolute;inset:0;z-index:-2;background:linear-gradient(90deg,#20271ef7 0%,#20271ee8 36%,#20271e88 67%,#20271edb 100%)}
+.hero:after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(0deg,#20271e55,transparent 35%,#20271e20)}
+.hero-art{position:absolute;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.hero-map{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 48%;opacity:.38;filter:sepia(.18) saturate(.72) contrast(1.04);mask-image:linear-gradient(90deg,#000 0%,#000 58%,transparent 100%)}
+.hero-tavernier{position:absolute;right:clamp(165px,20vw,310px);bottom:-14px;height:148px;width:148px;max-width:none;object-fit:contain;object-position:center bottom;opacity:.92;filter:none;mask-image:linear-gradient(180deg,transparent 0%,#000 12%,#000 100%)}
+.hero-content{position:relative;z-index:2;max-width:100%;padding:0}
+.hero h1{font-size:clamp(38px,5vw,58px);color:#f8f1e2;text-shadow:0 2px 9px #12170fcc;letter-spacing:.015em;margin:5px 0 3px}
+.hero .hero-bottom{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px;max-width:68%;font:12px system-ui,sans-serif;color:#f2e8d3}
+.hero .pill{border:1px solid #d5bd8a88;border-radius:5px;padding:6px 11px;background:#20271ebd;backdrop-filter:blur(3px)}
+@media(max-width:650px){.hero{min-height:124px;padding:18px 16px 16px}.hero-map{object-position:center;opacity:.25;mask-image:linear-gradient(90deg,#000,transparent 100%)}.hero-tavernier{height:104px;width:104px;right:8px;bottom:-8px;opacity:.7}.hero .hero-bottom{max-width:72%;gap:6px}.hero .pill{font-size:10px;padding:5px 7px}.hero h1{font-size:36px}}
 .eyebrow{font:700 11px/1.4 system-ui,sans-serif;letter-spacing:.23em;text-transform:uppercase;color:#d3bc8d}
 h1{font-size:clamp(34px,6vw,60px);line-height:1.03;font-weight:normal;margin:10px 0 8px;letter-spacing:-.035em}
 .subtitle{color:#dedbcf;max-width:600px;margin:0;font-size:16px}
