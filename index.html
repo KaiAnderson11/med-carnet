@@ -87,6 +87,29 @@ textarea:focus,input:focus,select:focus{border-color:var(--moss);box-shadow:0 0 
 .hero .pill{background:#20291fbd;border-color:#b8a777;color:#f5edda;backdrop-filter:blur(3px)}
 @media(max-width:640px){.hero-content{padding:1.1rem .9rem}.hero-map{width:76%;right:-18%;opacity:.25}.hero-tavernier{right:4%;height:118%;bottom:-24%;max-width:39%;opacity:.58}.hero-bottom{position:relative;z-index:2;max-width:78%;flex-wrap:wrap}.hero h1{font-size:2rem}}
 
+
+/* BANDEAU FINAL — la carte couvre bien tout le fond, Drotham reste discret à droite. */
+.hero{position:relative;isolation:isolate;overflow:hidden;min-height:174px;background:#20271e!important;border-bottom:3px solid var(--gold)}
+.hero:before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,#20271ef2 0%,#20271ed9 28%,#20271e9c 58%,#20271e65 78%,#20271ebd 100%)}
+.hero:after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(0deg,#20271e55,transparent 42%,#20271e20)}
+.hero-art{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.hero-map{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 48%;opacity:.62;filter:sepia(.18) saturate(.72) contrast(1.04);mask-image:none}
+.hero-tavernier{position:absolute;right:5%;bottom:-10px;height:148px;width:148px;max-width:none;object-fit:contain;object-position:center bottom;opacity:.96;filter:none;mask-image:linear-gradient(180deg,transparent 0%,#000 10%,#000 100%)}
+.hero-content{position:relative;z-index:2;max-width:100%;padding:12px clamp(18px,4vw,54px) 14px}
+.hero h1{font-size:clamp(38px,5vw,58px);color:#f8f1e2;text-shadow:0 2px 9px #12170fcc;letter-spacing:.015em;margin:5px 0 3px}
+.hero .hero-bottom{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px;max-width:72%;font:12px system-ui,sans-serif;color:#f2e8d3}
+.hero .pill{border:1px solid #d5bd8a99;border-radius:5px;padding:6px 11px;background:#20271edb;backdrop-filter:blur(3px);color:#f8f1e2}
+@media(max-width:650px){
+ .hero{min-height:136px}
+ .hero-map{object-position:center;opacity:.48}
+ .hero:before{background:linear-gradient(90deg,#20271ef5 0%,#20271edc 48%,#20271e8a 100%)}
+ .hero-tavernier{height:108px;width:108px;right:5px;bottom:-7px;opacity:.84}
+ .hero-content{padding:9px 14px 12px}
+ .hero .hero-bottom{max-width:76%;gap:6px}
+ .hero .pill{font-size:10px;padding:5px 7px}
+ .hero h1{font-size:36px}
+}
+
 </style>
 </head>
 <body>
