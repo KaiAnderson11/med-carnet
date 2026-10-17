@@ -90,15 +90,11 @@ textarea:focus,input:focus,select:focus{border-color:var(--moss);box-shadow:0 0 
 </nav>
 <main>
 <section class="tab-panel" id="session">
-  <div class="section-head"><div><div class="kicker">Les pages précédentes</div><h2>Dernière séance</h2><p class="intro">Gardez une trace de ce qui s’est passé, de là où vous en êtes et des choix qui comptent.</p></div></div>
+  <div class="section-head"><div><div class="kicker">Les pages précédentes</div><h2>Dernière séance</h2><p class="intro">Un compte rendu commun, rapide à compléter : date, faits marquants et actions à mener.</p></div></div>
   <div class="panel">
-    <div class="two">
-      <div class="field"><label class="panel-label" for="sessionTitle">Titre ou numéro de séance</label><input id="sessionTitle" type="text" placeholder="Ex. Séance 12 — Le passage oublié"></div>
-      <div class="field"><label class="panel-label" for="sessionDate">Date de la séance</label><input id="sessionDate" type="date"></div>
-    </div>
-    <div class="field"><label class="panel-label" for="events">Événements marquants</label><textarea id="events" placeholder="Que s’est-il passé ? Quels lieux, rencontres ou révélations retenir ?"></textarea></div>
-    <div class="field"><label class="panel-label" for="ending">Situation finale</label><textarea id="ending" placeholder="Où sont les personnages à la fin ? Quel est leur état et qu’est-ce qui est en cours ?"></textarea></div>
-    <div class="field"><label class="panel-label" for="decisions">Décisions et conséquences</label><textarea id="decisions" placeholder="Choix du groupe, promesses, alliances, conséquences à suivre…"></textarea></div>
+    <div class="field"><label class="panel-label" for="sessionDate">Date de la séance</label><input id="sessionDate" type="date"></div>
+    <div class="field"><label class="panel-label" for="events">Faits marquants</label><textarea id="events" placeholder="Les événements importants, découvertes, rencontres et décisions à retenir…"></textarea></div>
+    <div class="field"><label class="panel-label" for="actions">Actions à mener</label><textarea id="actions" placeholder="Les prochaines démarches du groupe, les engagements à tenir et les points à vérifier…"></textarea></div>
   </div>
 </section>
 <section class="tab-panel hidden" id="characters">
@@ -164,6 +160,15 @@ document.querySelectorAll('.tab').forEach(function(button) {
     document.querySelectorAll('main input, main textarea, main select').forEach(function(el) {
       if (el.id) result[el.id] = el.value;
     });
+    if (!result.actions) {
+      var legacyActions = [];
+      if (result.decisions) legacyActions.push('Actions à mener / décisions :\n' + result.decisions);
+      if (result.ending) legacyActions.push('Situation de fin de séance :\n' + result.ending);
+      if (legacyActions.length) result.actions = legacyActions.join('\n\n');
+    }
+    delete result.sessionTitle;
+    delete result.ending;
+    delete result.decisions;
     result.mysteries = Array.from(document.querySelectorAll('#mysteryList .mystery')).map(function(card) {
       var item = {};
       var keys = ['type','title','author','detail'];
@@ -214,6 +219,12 @@ document.querySelectorAll('.tab').forEach(function(button) {
       reader.onload = function() {
         try {
           var data = JSON.parse(reader.result);
+          if (!data.actions) {
+            var legacyActions = [];
+            if (data.decisions) legacyActions.push('Actions à mener / décisions :\n' + data.decisions);
+            if (data.ending) legacyActions.push('Situation de fin de séance :\n' + data.ending);
+            if (legacyActions.length) data.actions = legacyActions.join('\n\n');
+          }
           document.querySelectorAll('main input, main textarea, main select').forEach(function(el) {
             if (el.id && Object.prototype.hasOwnProperty.call(data, el.id)) el.value = data[el.id];
           });
@@ -352,7 +363,7 @@ function renderMysteries(){
  });
 }
 function collect(){const o={};document.querySelectorAll('main input,main textarea,main select').forEach(e=>{if(e.id)o[e.id]=e.value});o.mysteries=data.mysteries;return o}
-function apply(o){applyingRemote=true;data.mysteries=Array.isArray(o.mysteries)?o.mysteries:[];document.querySelectorAll('main input,main textarea,main select').forEach(e=>{if(e.id&&Object.hasOwn(o,e.id))e.value=o[e.id]});renderMysteries();applyingRemote=false}
+function apply(o){applyingRemote=true;o=o&&typeof o==='object'?{...o}:{};if(!o.actions){const legacy=[];if(o.decisions)legacy.push('Actions à mener / décisions :\n'+o.decisions);if(o.ending)legacy.push('Situation de fin de séance :\n'+o.ending);if(legacy.length)o.actions=legacy.join('\n\n')}delete o.sessionTitle;delete o.ending;delete o.decisions;data.mysteries=Array.isArray(o.mysteries)?o.mysteries:[];document.querySelectorAll('main input,main textarea,main select').forEach(e=>{if(e.id&&Object.hasOwn(o,e.id))e.value=o[e.id]});renderMysteries();applyingRemote=false}
 function saveLocal(){try{localStorage.setItem(KEY,JSON.stringify(collect()))}catch(e){}}
 function save(){saveLocal();if(cloudReady&&!applyingRemote){set(cloudRef,collect()).then(()=>$('saveStatus').textContent='Synchronisé avec le groupe').catch(()=>$('saveStatus').textContent='Erreur de synchro — copie locale conservée')}else if(!cloudReady)$('saveStatus').textContent='Sauvegardé sur cet appareil · partage à configurer'}
 function scheduleSave(){$('saveStatus').textContent='Enregistrement…';clearTimeout(timer);timer=setTimeout(save,500)}
